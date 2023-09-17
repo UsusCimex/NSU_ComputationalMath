@@ -1,7 +1,4 @@
 import matplotlib.pyplot as plt
-import numpy as np
-import sys
-import matplotlib.pyplot as plt
 import math
 import sys
 
@@ -12,7 +9,7 @@ def mainFunction(x):
 # Функция интерполяции Лагранжа
 def lagrangeInterpolation(X):
     def interpolatedFunction(x):
-        result = 0
+        result = 0.0
         for i in range(len(X)):
             temp = mainFunction(X[i])
             for j in range(len(X)):
@@ -30,12 +27,12 @@ if len(params) != 4:
     sys.exit()
 
 # Обработка параметров
-a = float(params[0])
-if a < 0:
+left = float(params[0])
+if left < 0:
     print("Invalid parameter value: FROM")
     sys.exit()
-b = float(params[1])
-if b < a:
+right = float(params[1])
+if right < left:
     print("Invalid parameter value: TO")
     sys.exit()
 numNodes = int(params[2])
@@ -43,43 +40,48 @@ if numNodes < 0:
     print("Invalid parameter value: NUMBERNODES")
     sys.exit()
 errorDot = float(params[3])
-if errorDot < a or errorDot > b:
+if errorDot < left or errorDot > right:
     print("Invalid parameter value: ERRORDOT")
     sys.exit()
 plt.scatter(errorDot, mainFunction(errorDot), s=50)
 
 # Вычисление точек основной функции
-numDotOfFunc = int((b - a) * 100)
+numDotOfFunc = int((right - left) * 10)
 X = []
 Y = []
-mainStep = (b - a) / numDotOfFunc
+mainStep = (right - left) / numDotOfFunc
 for i in range(numDotOfFunc):
-    X.append(a + mainStep * i)
+    X.append(left + mainStep * i)
     Y.append(mainFunction(X[i]))
+
+# Построение основного графика
+X = X[int(len(X) * 0.2):int(len(X) * 0.8)]
+Y = Y[int(len(Y) * 0.2):int(len(Y) * 0.8)]
 plt.plot(X, Y, label="Main Function", linewidth=4)
 
 # Создание наборов точек для интерполяции Лагранжа
 lagX = []
-step = (b - a) / numNodes
+step = (right - left) / numNodes
 for i in range(numNodes):
-    lagX.append(a + step * i)
+    lagX.append(left + step * i)
 interpolatedFunc1 = lagrangeInterpolation(lagX)
 
 lagX2 = []
-step = (b - a) / (numNodes * 2)
+step = (right - left) / (numNodes * 2)
 for i in range(numNodes * 2):
-    lagX2.append(a + step * i)
+    lagX2.append(left + step * i)
 interpolatedFunc2 = lagrangeInterpolation(lagX2)
 
 # Вычисление и отображение интерполированных функций
 Y2 = []
-for i in range(numDotOfFunc):
-    Y2.append(interpolatedFunc1(a + mainStep * i))
+for i in range(len(X)):
+    Y2.append(interpolatedFunc1(X[i]))
 plt.plot(X, Y2, label=f"Lagrange Interpolation with {numNodes} Nodes")
 plt.scatter(errorDot, interpolatedFunc1(errorDot), s=40)
+
 Y3 = []
-for i in range(numDotOfFunc):
-    Y3.append(interpolatedFunc2(a + mainStep * i))
+for i in range(len(X)):
+    Y3.append(interpolatedFunc2(X[i]))
 plt.plot(X, Y3, label=f"Lagrange Interpolation with {numNodes * 2} Nodes")
 plt.scatter(errorDot, interpolatedFunc2(errorDot), s=40)
 
@@ -89,4 +91,5 @@ print(f"Error between the main function and the Lagrange interpolation with {num
 
 # Вывод легенды и отображение графика
 plt.legend()
+plt.grid(True)
 plt.show()
