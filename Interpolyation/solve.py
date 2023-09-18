@@ -55,19 +55,20 @@ for i in range(numDotOfFunc):
     Y.append(mainFunction(X[i]))
 
 # Построение основного графика
-X = X[int(len(X) * 0.2):int(len(X) * 0.8)]
-Y = Y[int(len(Y) * 0.2):int(len(Y) * 0.8)]
+#X = X[int(len(X) * 0.2):int(len(X) * 0.8)]
+#Y = Y[int(len(Y) * 0.2):int(len(Y) * 0.8)]
 plt.plot(X, Y, label="Main Function", linewidth=4)
 
 # Создание наборов точек для интерполяции Лагранжа
 lagX = []
-step = (right - left) / numNodes
+step = (right - left) / (numNodes - 1)
 for i in range(numNodes):
     lagX.append(left + step * i)
 interpolatedFunc1 = lagrangeInterpolation(lagX)
+print(lagX)
 
 lagX2 = []
-step = (right - left) / (numNodes * 2)
+step = (right - left) / (numNodes * 2 - 1)
 for i in range(numNodes * 2):
     lagX2.append(left + step * i)
 interpolatedFunc2 = lagrangeInterpolation(lagX2)
