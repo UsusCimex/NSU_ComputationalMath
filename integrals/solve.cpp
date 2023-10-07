@@ -46,16 +46,18 @@ int main(int argc, char* argv[]) {
     double to = std::stoi(argv[2]);
     int numNodes = std::stoi(argv[3]);
 
-    std::cout << "Function = ln(1+x)" << std:: endl;
-    std::cout << "Rectangle integral result: " << integral(from, to, func1, numNodes) << std:: endl;
-    std::cout << "Trapezoidal integral result: " << integral2(from, to, func1) << std:: endl;
-    std::cout << "Parabola integral result: " << integral3(from, to, func1) << std:: endl;
-    std::cout << "Three-eighths integral result: " << integral4(from, to, func1) << std:: endl;
-
-    std::cout << "\nFunction = e^x cos(x)" << std:: endl;
-    std::cout << "Rectangle integral result: " << integral(from, to, func2, numNodes) << std:: endl;
-    std::cout << "Trapezoidal integral result: " << integral2(from, to, func2) << std:: endl;
-    std::cout << "Parabola integral result: " << integral3(from, to, func2) << std:: endl;
-    std::cout << "Three-eighths integral result: " << integral4(from, to, func2) << std:: endl;
+    std::cout << "Function = ln(1+x)" << std::endl;
+    std::cout << "Real integral result: " << integral(from, to, func1, (to - from) * 100) << std::endl;
+    std::cout << "Rectangle integral result: " << integral(from, to, func1, numNodes) << std::endl;
+    std::cout << "Trapezoidal integral result: " << integral2(from, to, func1) << std::endl;
+    std::cout << "Parabola integral result: " << integral3(from, to, func1) << std::endl;
+    std::cout << "Three-eighths integral result: " << integral4(from, to, func1) << std::endl;
+    
+    std::cout << "\nFunction = e^x cos(x)" << std::endl;
+    std::cout << "Real integral result: " << integral(from, to, func2, (to - from) * 100) << std::endl;
+    std::cout << "Rectangle integral result: " << integral(from, to, func2, numNodes) << std::endl;
+    std::cout << "Trapezoidal integral result: " << integral2(from, to, func2) << std::endl;
+    std::cout << "Parabola integral result: " << integral3(from, to, func2) << std::endl;
+    std::cout << "Three-eighths integral result: " << integral4(from, to, func2) << std::endl;
     return 0;
 }
