@@ -2,11 +2,11 @@
 #include <math.h>
 
 double func1(double x) {
-    return logf64(1 + x);
+    return logf(1 + x);
 }
 
 double func2(double x) {
-    return expf64(x)*cosf64(x);
+    return expf(x)*cosf(x);
 }
 
 typedef double (*integralFunction)(double);
@@ -45,19 +45,32 @@ int main(int argc, char* argv[]) {
     double from = std::stoi(argv[1]);
     double to = std::stoi(argv[2]);
     int numNodes = std::stoi(argv[3]);
+    int p; //Order of accuracy
 
     std::cout << "Function = ln(1+x)" << std::endl;
-    std::cout << "Real integral result: " << integral(from, to, func1, (to - from) * 100) << std::endl;
+    std::cout << "Real integral result: " << integral(from, to, func1, (to - from) * 1000) << std::endl;
     std::cout << "Rectangle integral result: " << integral(from, to, func1, numNodes) << std::endl;
     std::cout << "Trapezoidal integral result: " << integral2(from, to, func1) << std::endl;
     std::cout << "Parabola integral result: " << integral3(from, to, func1) << std::endl;
     std::cout << "Three-eighths integral result: " << integral4(from, to, func1) << std::endl;
+
+    std::cout << "Rectangle integral error: " << abs(integral(from, to, func1, (to - from) * 1000) -
+                                                     integral(from, to, func1, numNodes)) << std::endl;
+    p = 2;
+    std::cout << "Runge integral error: " << abs(integral(from, to, func1, numNodes / 2) -
+                                                 integral(from, to, func1, numNodes)) / (pow(2, p) - 1) << std::endl << std::endl;
     
     std::cout << "\nFunction = e^x cos(x)" << std::endl;
-    std::cout << "Real integral result: " << integral(from, to, func2, (to - from) * 100) << std::endl;
+    std::cout << "Real integral result: " << integral(from, to, func2, (to - from) * 1000) << std::endl;
     std::cout << "Rectangle integral result: " << integral(from, to, func2, numNodes) << std::endl;
     std::cout << "Trapezoidal integral result: " << integral2(from, to, func2) << std::endl;
     std::cout << "Parabola integral result: " << integral3(from, to, func2) << std::endl;
     std::cout << "Three-eighths integral result: " << integral4(from, to, func2) << std::endl;
+
+    std::cout << "Rectangle integral error: " << abs(integral(from, to, func2, (to - from) * 1000) -
+                                                     integral(from, to, func2, numNodes)) << std::endl;
+    p = 2;
+    std::cout << "Runge integral error: " << abs(integral(from, to, func2, numNodes / 2) -
+                                                 integral(from, to, func2, numNodes)) / (pow(2, p) - 1) << std::endl << std::endl;
     return 0;
 }
