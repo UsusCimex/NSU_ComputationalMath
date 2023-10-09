@@ -12,29 +12,50 @@ double func2(double x) {
 typedef double (*integralFunction)(double);
 // Rectangle formula
 double integral(double from, double to, integralFunction func, int numNodes) {
-    double area = 0;
+    double result = 0;
     double step = (to - from) / numNodes;
     for (int i = 0; i < numNodes; ++i) {
         double a = from + i * step;
         double b = from + (i + 1) * step;
-        area += func((a + b) / 2) * step;
+        result += func((a + b) / 2) * step;
     }
-    return area;
+    return result;
 }
 
 // Trapezoidal formula
-double integral2(double from, double to, integralFunction func) {
-    return (to - from) / 2 * (func(from) + func(to)); 
+double integral2(double from, double to, integralFunction func, int numNodes) {
+    double result = 0;
+    double step = (to - from) / numNodes;
+    for (int i = 0; i < numNodes; ++i) {
+        double a = from + i * step;
+        double b = from + (i + 1) * step;
+        result += (b - a) / 2 * (func(a) + func(b)); ;
+    }
+    return result;
 }
 
 // Parabola formula (Sympson)
-double integral3(double from, double to, integralFunction func) {
-    return (to - from) / 6 * (func(from) + 4 * func((from + to) / 2) + func(to)); 
+double integral3(double from, double to, integralFunction func, int numNodes) {
+    double result = 0;
+    double step = (to - from) / numNodes;
+    for (int i = 0; i < numNodes; ++i) {
+        double a = from + i * step;
+        double b = from + (i + 1) * step;
+        result += (b - a) / 6 * (func(a) + 4 * func((a + b) / 2) + func(b));
+    }
+    return result;
 }
 
 // Three-eighths formula
-double integral4(double from, double to, integralFunction func) {
-    return (to - from) / 8 * (func(from) + 3 * func(from + (to - from) / 3) + 3 * func(to - (to - from) / 3) + func(to));
+double integral4(double from, double to, integralFunction func, int numNodes) {
+    double result = 0;
+    double step = (to - from) / numNodes;
+    for (int i = 0; i < numNodes; ++i) {
+        double a = from + i * step;
+        double b = from + (i + 1) * step;
+        result += (b - a) / 8 * (func(a) + 3 * func(a + (b - a) / 3) + 3 * func(b - (b - a) / 3) + func(b));
+    }
+    return result;
 }
 
 int main(int argc, char* argv[]) {
@@ -54,37 +75,49 @@ int main(int argc, char* argv[]) {
     calculation = integral(from, to, func1, numNodes);
     std::cout << "Rectangle integral result: " << calculation << " (" << 
                                                   abs(realIntegral - calculation) << ")" << std::endl;
-    calculation = integral2(from, to, func1);
+    calculation = integral2(from, to, func1, numNodes);
     std::cout << "Trapezoidal integral result: " << calculation << " (" <<
                                                     abs(realIntegral - calculation) << ")" << std::endl;
-    calculation = integral3(from, to, func1);
-    std::cout << "Parabola integral result: " << calculation << " (" <<
+    calculation = integral3(from, to, func1, numNodes);
+    std::cout << "Parabola(Simpson) integral result: " << calculation << " (" <<
                                                  abs(realIntegral - calculation) << ")" << std::endl;
-    calculation = integral4(from, to, func1);
+    calculation = integral4(from, to, func1, numNodes);
     std::cout << "Three-eighths integral result: " << calculation << " (" <<
                                                       abs(realIntegral - calculation) << ")" << std::endl;
 
     p = 2;
     std::cout << "Runge integral error (rectangle): " << abs(integral(from, to, func1, numNodes / 2) -
-                                                 integral(from, to, func1, numNodes)) / (pow(2, p) - 1) << std::endl << std::endl;
+                                                 integral(from, to, func1, numNodes)) / (pow(2, p) - 1) << std::endl;
+    p = 2;
+    std::cout << "Runge integral error (trapezoidal): " << abs(integral2(from, to, func1, numNodes / 2) -
+                                                 integral2(from, to, func1, numNodes)) / (pow(2, p) - 1) << std::endl;
+    p = 4;
+    std::cout << "Runge integral error (Simpson): " << abs(integral3(from, to, func1, numNodes / 2) -
+                                                 integral3(from, to, func1, numNodes)) / (pow(2, p) - 1) << std::endl << std::endl;
     
     realIntegral = integral(from, to, func2, (to - from) * 1000);
     std::cout << "Real integral result: " << realIntegral << std::endl;
     calculation = integral(from, to, func2, numNodes);
     std::cout << "Rectangle integral result: " << calculation << " (" << 
                                                   abs(realIntegral - calculation) << ")" << std::endl;
-    calculation = integral2(from, to, func2);
+    calculation = integral2(from, to, func2, numNodes);
     std::cout << "Trapezoidal integral result: " << calculation << " (" <<
                                                     abs(realIntegral - calculation) << ")" << std::endl;
-    calculation = integral3(from, to, func2);
-    std::cout << "Parabola integral result: " << calculation << " (" <<
+    calculation = integral3(from, to, func2, numNodes);
+    std::cout << "Parabola(Simpson) integral result: " << calculation << " (" <<
                                                  abs(realIntegral - calculation) << ")" << std::endl;
-    calculation = integral4(from, to, func2);
+    calculation = integral4(from, to, func2, numNodes);
     std::cout << "Three-eighths integral result: " << calculation << " (" <<
                                                       abs(realIntegral - calculation) << ")" << std::endl;
 
     p = 2;
     std::cout << "Runge integral error (rectangle): " << abs(integral(from, to, func2, numNodes / 2) -
-                                                 integral(from, to, func2, numNodes)) / (pow(2, p) - 1) << std::endl << std::endl;
+                                                 integral(from, to, func2, numNodes)) / (pow(2, p) - 1) << std::endl;
+    p = 2;
+    std::cout << "Runge integral error (trapezoidal): " << abs(integral2(from, to, func2, numNodes / 2) -
+                                                 integral2(from, to, func2, numNodes)) / (pow(2, p) - 1) << std::endl;
+    p = 4;
+    std::cout << "Runge integral error (Simpson): " << abs(integral3(from, to, func2, numNodes / 2) -
+                                                 integral3(from, to, func2, numNodes)) / (pow(2, p) - 1) << std::endl << std::endl;
     return 0;
 }
