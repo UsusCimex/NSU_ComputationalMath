@@ -46,31 +46,45 @@ int main(int argc, char* argv[]) {
     double to = std::stoi(argv[2]);
     int numNodes = std::stoi(argv[3]);
     int p; //Order of accuracy
+    double realIntegral, calculation;
 
     std::cout << "Function = ln(1+x)" << std::endl;
-    std::cout << "Real integral result: " << integral(from, to, func1, (to - from) * 1000) << std::endl;
-    std::cout << "Rectangle integral result: " << integral(from, to, func1, numNodes) << std::endl;
-    std::cout << "Trapezoidal integral result: " << integral2(from, to, func1) << std::endl;
-    std::cout << "Parabola integral result: " << integral3(from, to, func1) << std::endl;
-    std::cout << "Three-eighths integral result: " << integral4(from, to, func1) << std::endl;
+    realIntegral = integral(from, to, func1, (to - from) * 1000);
+    std::cout << "Real integral result: " << realIntegral << std::endl;
+    calculation = integral(from, to, func1, numNodes);
+    std::cout << "Rectangle integral result: " << calculation << " (" << 
+                                                  abs(realIntegral - calculation) << ")" << std::endl;
+    calculation = integral2(from, to, func1);
+    std::cout << "Trapezoidal integral result: " << calculation << " (" <<
+                                                    abs(realIntegral - calculation) << ")" << std::endl;
+    calculation = integral3(from, to, func1);
+    std::cout << "Parabola integral result: " << calculation << " (" <<
+                                                 abs(realIntegral - calculation) << ")" << std::endl;
+    calculation = integral4(from, to, func1);
+    std::cout << "Three-eighths integral result: " << calculation << " (" <<
+                                                      abs(realIntegral - calculation) << ")" << std::endl;
 
-    std::cout << "Rectangle integral error: " << abs(integral(from, to, func1, (to - from) * 1000) -
-                                                     integral(from, to, func1, numNodes)) << std::endl;
     p = 2;
-    std::cout << "Runge integral error: " << abs(integral(from, to, func1, numNodes / 2) -
+    std::cout << "Runge integral error (rectangle): " << abs(integral(from, to, func1, numNodes / 2) -
                                                  integral(from, to, func1, numNodes)) / (pow(2, p) - 1) << std::endl << std::endl;
     
-    std::cout << "\nFunction = e^x cos(x)" << std::endl;
-    std::cout << "Real integral result: " << integral(from, to, func2, (to - from) * 1000) << std::endl;
-    std::cout << "Rectangle integral result: " << integral(from, to, func2, numNodes) << std::endl;
-    std::cout << "Trapezoidal integral result: " << integral2(from, to, func2) << std::endl;
-    std::cout << "Parabola integral result: " << integral3(from, to, func2) << std::endl;
-    std::cout << "Three-eighths integral result: " << integral4(from, to, func2) << std::endl;
+    realIntegral = integral(from, to, func2, (to - from) * 1000);
+    std::cout << "Real integral result: " << realIntegral << std::endl;
+    calculation = integral(from, to, func2, numNodes);
+    std::cout << "Rectangle integral result: " << calculation << " (" << 
+                                                  abs(realIntegral - calculation) << ")" << std::endl;
+    calculation = integral2(from, to, func2);
+    std::cout << "Trapezoidal integral result: " << calculation << " (" <<
+                                                    abs(realIntegral - calculation) << ")" << std::endl;
+    calculation = integral3(from, to, func2);
+    std::cout << "Parabola integral result: " << calculation << " (" <<
+                                                 abs(realIntegral - calculation) << ")" << std::endl;
+    calculation = integral4(from, to, func2);
+    std::cout << "Three-eighths integral result: " << calculation << " (" <<
+                                                      abs(realIntegral - calculation) << ")" << std::endl;
 
-    std::cout << "Rectangle integral error: " << abs(integral(from, to, func2, (to - from) * 1000) -
-                                                     integral(from, to, func2, numNodes)) << std::endl;
     p = 2;
-    std::cout << "Runge integral error: " << abs(integral(from, to, func2, numNodes / 2) -
+    std::cout << "Runge integral error (rectangle): " << abs(integral(from, to, func2, numNodes / 2) -
                                                  integral(from, to, func2, numNodes)) / (pow(2, p) - 1) << std::endl << std::endl;
     return 0;
 }
