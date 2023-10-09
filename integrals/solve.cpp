@@ -95,6 +95,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Runge integral error (Simpson): " << abs(integral3(from, to, func1, numNodes / 2) -
                                                  integral3(from, to, func1, numNodes)) / (pow(2, p) - 1) << std::endl << std::endl;
     
+    std::cout << "Function = e^x * cos(x)" << std::endl;
     realIntegral = integral(from, to, func2, (to - from) * 1000);
     std::cout << "Real integral result: " << realIntegral << std::endl;
     calculation = integral(from, to, func2, numNodes);
