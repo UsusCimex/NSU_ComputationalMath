@@ -1,31 +1,56 @@
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <math.h>
 
 using namespace std;
 
+void print_matrix(vector<vector<double>>& matrix) {
+    for (int i = 0; i < matrix.size(); ++i) {
+        cout << "|";
+        for (int j = 0; j < matrix.at(0).size(); ++j) {
+            cout << std::setw(8) << std::setprecision(3) << matrix.at(i).at(j) << " ";
+        }
+        cout << "|" << endl;
+    }
+    cout << endl;
+}
+
+void print_vector(vector<double>& vec) {
+    for (int i = 0; i < vec.size(); ++i) {
+        cout << "x[" << i << "] = " << vec.at(i) << endl;
+    }
+    cout << endl;
+}
+
 void LU_Decomposition(vector<vector<double>>& A, vector<vector<double>>& L, vector<vector<double>>& U) {
     int n = A.size();
 
     for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            if (i < j) {
-                L[i][j] = 0;
-                U[j][i] = 0;
+        for (int j = i; j < n; ++j) {
+            double sum = 0;
+            for (int k = 0; k < i; ++k) {
+                sum += (L[i][k] * U[k][j]);
             }
-            else if (j == i) {
-                L[j][i] = 1;
-                U[j][i] = A[j][i];
-            }
-            else {
-                L[j][i] = A[j][i] / U[i][i];
-                U[j][i] = 0;
+            U[i][j] = A[i][j] - sum;
+        }
+        for (int j = i; j < n; ++j) {
+            if (i == j) {
+                L[i][i] = 1;
+            } else {
+                double sum = 0;
                 for (int k = 0; k < i; ++k) {
-                    U[j][i] += -L[j][k] * U[k][i];
+                    sum += (L[j][k] * U[k][i]);
                 }
+                L[j][i] = (A[j][i] - sum) / U[i][i];
             }
         }
     }
+
+    cout << "L Matrix:" << endl;
+    print_matrix(L);
+    cout << "U Matrix:" << endl;
+    print_matrix(U);
 }
 
 vector<double> solveUsingLU(vector<vector<double>> A, vector<double> b) {
@@ -89,6 +114,11 @@ void QR_Decomposition(vector<vector<double>>& A, vector<vector<double>>& Q, vect
             }
         }
     }
+
+    cout << "Q Matrix:" << endl;
+    print_matrix(Q);
+    cout << "R Matrix:" << endl;
+    print_matrix(R);
 }
 
 // Решение системы методом QR-разложения
@@ -121,7 +151,7 @@ vector<double> solveUsingQR(vector<vector<double>> A, vector<double> b) {
 }
 
 // Функция для решения системы методом Гаусса-Зейделя
-vector<double> solveUsingGaussSeidel(const vector<vector<double>> A, const vector<double> b, double tol = 1e-6, int max_iter = 100) {
+vector<double> solveUsingGaussSeidel(const vector<vector<double>> A, const vector<double> b, double tol = 1e-8, int max_iter = 100) {
     int n = A.size();
     vector<double> x(n, 0);
     vector<double> x_new(n, 0);
@@ -159,7 +189,7 @@ vector<double> solveUsingGaussSeidel(const vector<vector<double>> A, const vecto
 }
 
 // Функция для решения системы методом Якоби
-vector<double> solveUsingJacobi(const vector<vector<double>> A, const vector<double> b, double tol = 1e-6, int max_iter = 100) {
+vector<double> solveUsingJacobi(const vector<vector<double>> A, const vector<double> b, double tol = 1e-8, int max_iter = 100) {
     int n = A.size();
     vector<double> x(n, 0);
     vector<double> x_new(n, 0);
@@ -213,23 +243,6 @@ vector<double> solveUsingTridiagonal(vector<vector<double>> A, vector<double> b)
     }
     
     return x;
-}
-
-void print_matrix(vector<vector<double>> matrix) {
-    for (int i = 0; i < matrix.size(); ++i) {
-        for (int j = 0; j < matrix.at(0).size(); ++j) {
-            cout << matrix.at(i).at(j) << " ";
-        }
-        cout << endl;
-    }
-    cout << endl;
-}
-
-void print_vector(vector<double> vec) {
-    for (int i = 0; i < vec.size(); ++i) {
-        cout << "x[" << i << "] = " << vec.at(i) << endl;
-    }
-    cout << endl;
 }
 
 int main(int argc, char* argv[]) {
