@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void print_matrix(vector<vector<double>>& matrix) {
+void PrintMatrix(vector<vector<double>>& matrix) {
     for (int i = 0; i < matrix.size(); ++i) {
         cout << "|";
         for (int j = 0; j < matrix.at(0).size(); ++j) {
@@ -16,13 +16,29 @@ void print_matrix(vector<vector<double>>& matrix) {
     cout << endl;
 }
 
-void print_vector(vector<double>& vec) {
+void PrintVector(vector<double>& vec) {
     for (int i = 0; i < vec.size(); ++i) {
         cout << "x[" << i << "] = " << vec.at(i) << endl;
     }
     cout << endl;
 }
 
+void TransponseMatrix(vector<vector<double>>& matrix) {
+    int rows = matrix.size();
+    int cols = matrix[0].size();
+    
+    vector<vector<double>> transposedMatrix(cols, vector<double>(rows));
+    
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            transposedMatrix[j][i] = matrix[i][j];
+        }
+    }
+    
+    matrix = transposedMatrix;
+}
+
+// LU-разложение матрицы A
 void LU_Decomposition(vector<vector<double>>& A, vector<vector<double>>& L, vector<vector<double>>& U) {
     int n = A.size();
 
@@ -48,11 +64,12 @@ void LU_Decomposition(vector<vector<double>>& A, vector<vector<double>>& L, vect
     }
 
     cout << "L Matrix:" << endl;
-    print_matrix(L);
+    PrintMatrix(L);
     cout << "U Matrix:" << endl;
-    print_matrix(U);
+    PrintMatrix(U);
 }
 
+// Решение СЛАУ при помощи LU-разложения
 vector<double> solveUsingLU(vector<vector<double>> A, vector<double> b) {
     int n = A.size();
     vector<vector<double>> L(n, vector<double>(n, 0));
@@ -83,42 +100,40 @@ vector<double> solveUsingLU(vector<vector<double>> A, vector<double> b) {
     return x;
 }
 
-void QR_Decomposition(vector<vector<double>>& A, vector<vector<double>>& Q, vector<vector<double>>& R) {
+// QR-разложение матрицы A (метод Холецкого)
+bool QR_Decomposition_Cholesky(vector<vector<double>>& A, vector<vector<double>>& Q, vector<vector<double>>& R) {
     int n = A.size();
-
-    for (int j = 0; j < n; ++j) {
-        vector<double> v(n, 0);
-        for (int i = 0; i < j; ++i) {
-            double dot_product = 0;
-            for (int k = 0; k < n; ++k) {
-                dot_product += Q[k][i] * A[k][j];
+    
+    for (int i = 0; i < n; ++i) {
+        //Сначала вычисляем значения элементов слева от диагонального элемента
+        for (int j = 0; j < i; ++j)
+        {
+            double sum = 0;
+            for (int k = 0; k < j; ++k)
+            {
+                sum += Q[i][k] * Q[j][k];
             }
-            for (int k = 0; k < n; ++k) {
-                v[k] += dot_product * Q[k][i];
-            }
+            Q[i][j] = (A[i][j] - sum) / Q[j][j];
         }
 
-        double norm_v = 0;
-        for (int k = 0; k < n; ++k) {
-            v[k] = A[k][j] - v[k];
-            norm_v += v[k] * v[k];
+        //Находим значение диагонального элемента
+        double temp = A[i][i];
+        for (int k = 0; k < i; ++k)
+        {
+            temp -= Q[i][k] * Q[i][k];
         }
-
-        norm_v = sqrt(norm_v);
-
-        for (int k = 0; k < n; ++k) {
-            Q[k][j] = v[k] / norm_v;
-            R[j][k] = 0;
-            for (int i = 0; i < n; ++i) {
-                R[j][k] += Q[i][j] * A[i][k];
-            }
-        }
+        Q[i][i] = sqrtl(temp);
     }
 
+    R = Q;
+    TransponseMatrix(R);
+    
     cout << "Q Matrix:" << endl;
-    print_matrix(Q);
+    PrintMatrix(Q);
     cout << "R Matrix:" << endl;
-    print_matrix(R);
+    PrintMatrix(R);
+
+    return true;
 }
 
 // Решение системы методом QR-разложения
@@ -127,36 +142,41 @@ vector<double> solveUsingQR(vector<vector<double>> A, vector<double> b) {
     vector<vector<double>> Q(n, vector<double>(n, 0));
     vector<vector<double>> R(n, vector<double>(n, 0));
     
-    QR_Decomposition(A, Q, R);
-
-    // Решение системы Q^T * Q * x = Q^T * b
-    vector<double> Qt_b(n, 0);
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            Qt_b[i] += Q[j][i] * b[j];
-        }
+    if (!QR_Decomposition_Cholesky(A, Q, R)) {
+        cout << "Choletsky decomposition failed (the matrix was not positively definite)..." << endl;
+        return vector<double>(n, 0);
     }
 
-    // Решение системы R * x = Qt_b методом обратной подстановки
+    // Решение системы Qy = b
+    vector<double> y(n, 0);
+    for (int i = 0; i < n; ++i) {
+        double sum = 0;
+        for (int j = 0; j < i; ++j) {
+            sum += Q[i][j] * y[j];
+        }
+        y[i] = (b[i] - sum) / Q[i][i];
+    }
+
+    // Решение системы Rx = y
     vector<double> x(n, 0);
     for (int i = n - 1; i >= 0; i--) {
         double sum = 0;
         for (int j = i + 1; j < n; ++j) {
             sum += R[i][j] * x[j];
         }
-        x[i] = (Qt_b[i] - sum) / R[i][i];
+        x[i] = (y[i] - sum) / R[i][i];
     }
 
     return x;
 }
 
-// Функция для решения системы методом Гаусса-Зейделя
-vector<double> solveUsingGaussSeidel(const vector<vector<double>> A, const vector<double> b, double tol = 1e-8, int max_iter = 100) {
+// Функция для решения системы методом Гаусса-Зейделя (В работе)
+vector<double> solveUsingGaussSeidel(const vector<vector<double>> A, const vector<double> b, double eps = 1e-8, int max_iter = 100) {
     int n = A.size();
     vector<double> x(n, 0);
     vector<double> x_new(n, 0);
     
-    for (int iter = 0; iter < max_iter; iter++) {
+    for (int iter = 0; iter < max_iter; ++iter) {
         for (int i = 0; i < n; ++i) {
             double sum1 = 0;
             double sum2 = 0;
@@ -172,7 +192,7 @@ vector<double> solveUsingGaussSeidel(const vector<vector<double>> A, const vecto
         // Проверка сходимости
         bool converged = true;
         for (int i = 0; i < n; ++i) {
-            if (fabs(x_new[i] - x[i]) > tol) {
+            if (fabs(x_new[i] - x[i]) > eps) {
                 converged = false;
                 break;
             }
@@ -188,8 +208,8 @@ vector<double> solveUsingGaussSeidel(const vector<vector<double>> A, const vecto
     return x_new;
 }
 
-// Функция для решения системы методом Якоби
-vector<double> solveUsingJacobi(const vector<vector<double>> A, const vector<double> b, double tol = 1e-8, int max_iter = 100) {
+// Функция для решения системы методом Якоби (В работе)
+vector<double> solveUsingJacobi(const vector<vector<double>> A, const vector<double> b, double eps = 1e-8, int max_iter = 100) {
     int n = A.size();
     vector<double> x(n, 0);
     vector<double> x_new(n, 0);
@@ -208,7 +228,7 @@ vector<double> solveUsingJacobi(const vector<vector<double>> A, const vector<dou
         // Проверка сходимости
         bool converged = true;
         for (int i = 0; i < n; ++i) {
-            if (fabs(x_new[i] - x[i]) > tol) {
+            if (fabs(x_new[i] - x[i]) > eps) {
                 converged = false;
                 break;
             }
@@ -227,6 +247,17 @@ vector<double> solveUsingJacobi(const vector<vector<double>> A, const vector<dou
 // Функция для решения системы методом прогонки для трехдиагональной матрицы
 vector<double> solveUsingTridiagonal(vector<vector<double>> A, vector<double> b) {
     int n = A.size();
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (abs(i - j) > 1) {
+                if (A[i][j] != 0) {
+                    cout << "The matrix is not tridiagonal..." << endl;
+                    return vector<double>(n, 0);
+                }
+            }
+        }
+    }
     
     // Прямой ход
     for (int i = 1; i < n; ++i) {
@@ -245,28 +276,38 @@ vector<double> solveUsingTridiagonal(vector<vector<double>> A, vector<double> b)
     return x;
 }
 
-int main(int argc, char* argv[]) {
-    // Пример трехдиагональной матрицы
-    vector<vector<double>> A = {{2, 1, 0},
-                                {1, 2, 1},
-                                {0, 1, 2}};
-    vector<double> b = {1, 0, 1};
+void TestMatrix(vector<vector<double>>& A, vector<double> b) {
+    cout << "Matrix A:" << endl;
+    PrintMatrix(A);
+    cout << "Vector b:" << endl;
+    PrintVector(b);
 
-    vector<double> solution = solveUsingTridiagonal(A, b);
     cout << "System solve sweep method:" << endl;
-    print_vector(solution);
-    vector<double> solution2 = solveUsingGaussSeidel(A, b);
-    cout << "System solve Gauss-Seidel method:" << endl;
-    print_vector(solution2);
-    vector<double> solution3 = solveUsingJacobi(A, b);
-    cout << "System solve Jacobi method:" << endl;
-    print_vector(solution3);
-    vector<double> solution4 = solveUsingLU(A, b);
-    cout << "System solve LU method:" << endl;
-    print_vector(solution4);
-    vector<double> solution5 = solveUsingQR(A, b);
-    cout << "System solve QR method:" << endl;
-    print_vector(solution5);
+    vector<double> solution = solveUsingTridiagonal(A, b);
+    PrintVector(solution);
 
+    cout << "System solve Gauss-Seidel method:" << endl;
+    vector<double> solution2 = solveUsingGaussSeidel(A, b);
+    PrintVector(solution2);
+
+    cout << "System solve Jacobi method:" << endl;
+    vector<double> solution3 = solveUsingJacobi(A, b);
+    PrintVector(solution3);
+
+    cout << "System solve LU method:" << endl;
+    vector<double> solution4 = solveUsingLU(A, b);
+    PrintVector(solution4);
+
+    cout << "System solve QR method (Cholesky):" << endl;
+    vector<double> solution5 = solveUsingQR(A, b);
+    PrintVector(solution5);
+}
+
+int main(int argc, char* argv[]) {
+    vector<vector<double>> A = {{81, -45, 45},
+                                {-45, 50, -15},
+                                {45, -15, 38}};
+    vector<double> b = {531, -460, 193};
+    TestMatrix(A, b);
     return 0;
 }
