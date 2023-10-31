@@ -170,7 +170,7 @@ vector<double> solveUsingQR(vector<vector<double>> A, vector<double> b) {
     return x;
 }
 
-// Функция для решения системы методом Гаусса-Зейделя (В работе)
+// Функция для решения системы методом Гаусса-Зейделя
 vector<double> solveUsingGaussSeidel(const vector<vector<double>> A, const vector<double> b, double eps = 1e-8, int max_iter = 100) {
     int n = A.size();
     vector<double> x(n, 0);
@@ -208,7 +208,7 @@ vector<double> solveUsingGaussSeidel(const vector<vector<double>> A, const vecto
     return x_new;
 }
 
-// Функция для решения системы методом Якоби (В работе)
+// Функция для решения системы методом Якоби
 vector<double> solveUsingJacobi(const vector<vector<double>> A, const vector<double> b, double eps = 1e-8, int max_iter = 100) {
     int n = A.size();
     vector<double> x(n, 0);
