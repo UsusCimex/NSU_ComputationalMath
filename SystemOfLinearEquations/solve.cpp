@@ -106,11 +106,9 @@ bool QR_Decomposition_Cholesky(vector<vector<double>>& A, vector<vector<double>>
     
     for (int i = 0; i < n; ++i) {
         //Сначала вычисляем значения элементов слева от диагонального элемента
-        for (int j = 0; j < i; ++j)
-        {
+        for (int j = 0; j < i; ++j) {
             double sum = 0;
-            for (int k = 0; k < j; ++k)
-            {
+            for (int k = 0; k < j; ++k) {
                 sum += Q[i][k] * Q[j][k];
             }
             Q[i][j] = (A[i][j] - sum) / Q[j][j];
@@ -118,8 +116,7 @@ bool QR_Decomposition_Cholesky(vector<vector<double>>& A, vector<vector<double>>
 
         //Находим значение диагонального элемента
         double temp = A[i][i];
-        for (int k = 0; k < i; ++k)
-        {
+        for (int k = 0; k < i; ++k) {
             temp -= Q[i][k] * Q[i][k];
         }
         Q[i][i] = sqrtl(temp);
