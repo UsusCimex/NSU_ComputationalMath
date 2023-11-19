@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void PrintMatrix(vector<vector<double>>& matrix) {
+void PrintMatrix(const vector<vector<double>>& matrix) {
     for (int i = 0; i < matrix.size(); ++i) {
         cout << "|";
         for (int j = 0; j < matrix.at(0).size(); ++j) {
@@ -16,7 +16,7 @@ void PrintMatrix(vector<vector<double>>& matrix) {
     cout << endl;
 }
 
-void PrintVector(vector<double>& vec) {
+void PrintVector(const vector<double>& vec) {
     for (int i = 0; i < vec.size(); ++i) {
         cout << "x[" << i << "] = " << vec.at(i) << endl;
     }
@@ -39,7 +39,7 @@ void TransponseMatrix(vector<vector<double>>& matrix) {
 }
 
 // LU-разложение матрицы A
-void LU_Decomposition(vector<vector<double>>& A, vector<vector<double>>& L, vector<vector<double>>& U) {
+void LU_Decomposition(const vector<vector<double>>& A, vector<vector<double>>& L, vector<vector<double>>& U) {
     int n = A.size();
 
     for (int i = 0; i < n; ++i) {
@@ -101,7 +101,7 @@ vector<double> solveUsingLU(vector<vector<double>> A, vector<double> b) {
 }
 
 // QR-разложение матрицы A (метод Холецкого)
-bool QR_Decomposition_Cholesky(vector<vector<double>>& A, vector<vector<double>>& Q, vector<vector<double>>& R) {
+bool QR_Decomposition_Cholesky(const vector<vector<double>>& A, vector<vector<double>>& Q, vector<vector<double>>& R) {
     int n = A.size();
     
     for (int i = 0; i < n; ++i) {
@@ -134,7 +134,7 @@ bool QR_Decomposition_Cholesky(vector<vector<double>>& A, vector<vector<double>>
 }
 
 // Решение системы методом QR-разложения
-vector<double> solveUsingQR(vector<vector<double>> A, vector<double> b) {
+vector<double> solveUsingQR(const vector<vector<double>>& A, const vector<double>& b) {
     int n = A.size();
     vector<vector<double>> Q(n, vector<double>(n, 0));
     vector<vector<double>> R(n, vector<double>(n, 0));
@@ -168,7 +168,7 @@ vector<double> solveUsingQR(vector<vector<double>> A, vector<double> b) {
 }
 
 // Функция для решения системы методом Гаусса-Зейделя
-vector<double> solveUsingGaussSeidel(const vector<vector<double>> A, const vector<double> b, double eps = 1e-8, int max_iter = 100) {
+vector<double> solveUsingGaussSeidel(const vector<vector<double>>& A, const vector<double>& b, double eps = 1e-8, int max_iter = 1000) {
     int n = A.size();
     vector<double> x(n, 0);
     vector<double> x_new(n, 0);
@@ -196,6 +196,7 @@ vector<double> solveUsingGaussSeidel(const vector<vector<double>> A, const vecto
         }
         
         if (converged) {
+            cout << "Count Iter: " << iter << endl;
             return x_new;
         }
         
@@ -206,12 +207,12 @@ vector<double> solveUsingGaussSeidel(const vector<vector<double>> A, const vecto
 }
 
 // Функция для решения системы методом Якоби
-vector<double> solveUsingJacobi(const vector<vector<double>> A, const vector<double> b, double eps = 1e-8, int max_iter = 100) {
+vector<double> solveUsingJacobi(const vector<vector<double>> A, const vector<double> b, double eps = 1e-8, int max_iter = 1000) {
     int n = A.size();
     vector<double> x(n, 0);
     vector<double> x_new(n, 0);
     
-    for (int iter = 0; iter < max_iter; iter++) {
+    for (int iter = 0; iter < max_iter; ++iter) {
         for (int i = 0; i < n; ++i) {
             double sum = 0;
             for (int j = 0; j < n; ++j) {
@@ -232,6 +233,7 @@ vector<double> solveUsingJacobi(const vector<vector<double>> A, const vector<dou
         }
         
         if (converged) {
+            cout << "Count Iter: " << iter << endl;
             return x_new;
         }
         
@@ -256,7 +258,6 @@ vector<double> solveUsingTridiagonal(vector<vector<double>> A, vector<double> b)
         }
     }
     
-    // Прямой ход
     for (int i = 1; i < n; ++i) {
         double m = A[i][i - 1] / A[i - 1][i - 1];
         A[i][i] -= m * A[i - 1][i];
@@ -301,10 +302,25 @@ void TestMatrix(vector<vector<double>>& A, vector<double> b) {
 }
 
 int main(int argc, char* argv[]) {
-    vector<vector<double>> A = {{81, -45, 45},
-                                {-45, 50, -15},
-                                {45, -15, 38}};
-    vector<double> b = {531, -460, 193};
+    // vector<vector<double>> A = {{81, -45, 45},
+    //                             {-45, 50, -15},
+    //                             {45, -15, 38}};
+    // vector<double> b = {531, -460, 193};
+
+    // vector<vector<double>> A = {{4, -1, -1},
+    //                             {-1, 4, -1},
+    //                             {-1, -1, 4}};
+    // vector<double> b = {2, 2, 2};
+
+    // vector<vector<double>> A = {{1.0, 1.0/2, 1.0/3}, //Найти число обусловл A2
+    //                             {1.0/2, 1.0/3, 1.0/4},
+    //                             {1.0/3, 1.0/4, 1.0/5}};
+    // vector<double> b = {1, 1, 1};
+
+    vector<vector<double>> A = {{2, -1, 0},
+                                {-1, 2, -1},
+                                {0, -1, 2}};
+    vector<double> b = {2, 2, 2};
     TestMatrix(A, b);
     return 0;
 }
