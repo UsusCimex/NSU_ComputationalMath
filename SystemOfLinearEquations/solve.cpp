@@ -313,14 +313,14 @@ vector<double> solveUsingQR(const vector<vector<double>>& A, const vector<double
     vector<double> x(n, 0);
     vector<double> Qtb(n, 0);
 
-    // Вычисление Q^Tb
+    // Вычисление y = Q^Tb
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
             Qtb[i] += Q[j][i] * b[j];
         }
     }
 
-    // Обратный ход для решения Rx = Qtb
+    // Обратный ход для решения Rx = y
     for (int i = n - 1; i >= 0; --i) {
         x[i] = Qtb[i];
         for (int j = i + 1; j < n; ++j) {
