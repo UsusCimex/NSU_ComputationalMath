@@ -26,10 +26,10 @@ x = symbols('x')
 a = symbols('a')
 
 # x - a = ln(1 + x)
-# sym_function_simple = a + log(1 + x)
+sym_function_simple = a + log(1 + x)
 
-# sym_function_newton = a + log(1 + x) - x
-# sym_function_newton_prime = diff(sym_function_newton, x)  # Производная функции
+sym_function_newton = a + log(1 + x) - x
+sym_function_newton_prime = diff(sym_function_newton, x)  # Производная функции
 
 # x = e^(x - a) - 1
 # sym_function_simple = exp(x - a) - 1
@@ -38,12 +38,10 @@ a = symbols('a')
 # sym_function_newton_prime = diff(sym_function_newton, x)  # Производная функции
 
 # x = a sin(x)
-sym_function_simple = a * sin(x);
+# sym_function_simple = a * sin(x);
 
-sym_function_newton = a * sin(x) - x
-sym_function_newton_prime = diff(sym_function_newton, x)  # Производная функции
-
-# x = arcsin(x / l)
+# sym_function_newton = a * sin(x) - x
+# sym_function_newton_prime = diff(sym_function_newton, x)  # Производная функции
 
 # Превращение символьных функций в численные функции
 func_simple = lambdify([x, a], sym_function_simple)
@@ -51,22 +49,22 @@ func_simple = lambdify([x, a], sym_function_simple)
 func_newton = lambdify([x, a], sym_function_newton)
 func_newton_prime = lambdify([x, a], sym_function_newton_prime)
 
-a_val = 10
+a_val = 5
 x0 = 0.1
 
 simple_iter_values = simple_iteration(func_simple, a_val, x0)
 print("simple: " + str(simple_iter_values[-1]))
 
-for i in range(0, 10, 1):
-    x0 = pi / 4 + (pi * i)
-    newtons_values = newton_method(func_newton, func_newton_prime, a_val, x0)
-    if (abs(newtons_values[-1] - newtons_values[-2]) > 0.1):
-        break
-    print(f"x={round(x0, 2)}: newton: {newtons_values[-1]}")
-    print(f"x={round(-x0, 2)}: newton: {-newtons_values[-1]}")
+# for i in range(0, 10, 1):
+#     x0 = pi / 4 + (pi * i)
+#     newtons_values = newton_method(func_newton, func_newton_prime, a_val, x0)
+#     if (abs(newtons_values[-1] - newtons_values[-2]) > 0.1):
+#         break
+#     print(f"x={round(x0, 2)}: newton: {newtons_values[-1]}")
+#     print(f"x={round(-x0, 2)}: newton: {-newtons_values[-1]}")
 
-# newtons_values = newton_method(func_newton, func_newton_prime, a_val, x0)
-# print("newton: " + str(newtons_values[-1]))
+newtons_values = newton_method(func_newton, func_newton_prime, a_val, x0)
+print("newton: " + str(newtons_values[-1]))
 
 func_simple_str = printing.latex(sym_function_simple)
 func_newton_str = printing.latex(sym_function_newton)
