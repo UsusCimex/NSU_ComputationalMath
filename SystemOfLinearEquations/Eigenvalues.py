@@ -14,14 +14,3 @@ print("Собственные числа матрицы:")
 print(eigenvalues)
 print("Норма матрицы A2")
 print(abs(max(eigenvalues)) / abs(min(eigenvalues)))
-
-print("\n Матрица Вандермонда")
-matrix = np.array([[1, 1, 1], # Матрица Вандермонда3 ~ 137, для 4 ~ 2466
-                  [2, 2**2, 2**3],
-                  [3, 3**2, 3**3]])
-
-eigenvalues = find_eigenvalues(matrix)
-print("Собственные числа матрицы:")
-print(eigenvalues)
-print("Норма матрицы A2")
-print(abs(max(eigenvalues)) / abs(min(eigenvalues)))
