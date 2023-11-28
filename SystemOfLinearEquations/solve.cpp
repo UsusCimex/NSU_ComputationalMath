@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void PrintMatrix(vector<vector<double>>& matrix) {
+void PrintMatrix(const vector<vector<double>>& matrix) {
     for (int i = 0; i < matrix.size(); ++i) {
         cout << "|";
         for (int j = 0; j < matrix.at(0).size(); ++j) {
@@ -16,7 +16,7 @@ void PrintMatrix(vector<vector<double>>& matrix) {
     cout << endl;
 }
 
-void PrintVector(vector<double>& vec) {
+void PrintVector(const vector<double>& vec) {
     for (int i = 0; i < vec.size(); ++i) {
         cout << "x[" << i << "] = " << vec.at(i) << endl;
     }
@@ -39,7 +39,7 @@ void TransponseMatrix(vector<vector<double>>& matrix) {
 }
 
 // LU-разложение матрицы A
-void LU_Decomposition(vector<vector<double>>& A, vector<vector<double>>& L, vector<vector<double>>& U) {
+void LU_Decomposition(const vector<vector<double>>& A, vector<vector<double>>& L, vector<vector<double>>& U) {
     int n = A.size();
 
     for (int i = 0; i < n; ++i) {
@@ -101,7 +101,7 @@ vector<double> solveUsingLU(vector<vector<double>> A, vector<double> b) {
 }
 
 // QR-разложение матрицы A (метод Холецкого)
-bool QR_Decomposition_Cholesky(vector<vector<double>>& A, vector<vector<double>>& Q, vector<vector<double>>& R) {
+bool LU_Decomposition_Cholesky(const vector<vector<double>>& A, vector<vector<double>>& L, vector<vector<double>>& U) {
     int n = A.size();
     
     for (int i = 0; i < n; ++i) {
@@ -109,37 +109,37 @@ bool QR_Decomposition_Cholesky(vector<vector<double>>& A, vector<vector<double>>
         for (int j = 0; j < i; ++j) {
             double sum = 0;
             for (int k = 0; k < j; ++k) {
-                sum += Q[i][k] * Q[j][k];
+                sum += L[i][k] * L[j][k];
             }
-            Q[i][j] = (A[i][j] - sum) / Q[j][j];
+            L[i][j] = (A[i][j] - sum) / L[j][j];
         }
 
         //Находим значение диагонального элемента
         double temp = A[i][i];
         for (int k = 0; k < i; ++k) {
-            temp -= Q[i][k] * Q[i][k];
+            temp -= L[i][k] * L[i][k];
         }
-        Q[i][i] = sqrtl(temp);
+        L[i][i] = sqrtl(temp);
     }
 
-    R = Q;
-    TransponseMatrix(R);
+    U = L;
+    TransponseMatrix(U);
     
-    cout << "Q Matrix:" << endl;
-    PrintMatrix(Q);
-    cout << "R Matrix:" << endl;
-    PrintMatrix(R);
+    cout << "L Matrix:" << endl;
+    PrintMatrix(L);
+    cout << "U Matrix:" << endl;
+    PrintMatrix(U);
 
     return true;
 }
 
-// Решение системы методом QR-разложения
-vector<double> solveUsingQR(vector<vector<double>> A, vector<double> b) {
+// Решение системы методом LU-разложения Холецкого
+vector<double> solveUsingCholesky(const vector<vector<double>>& A, const vector<double>& b) {
     int n = A.size();
-    vector<vector<double>> Q(n, vector<double>(n, 0));
-    vector<vector<double>> R(n, vector<double>(n, 0));
+    vector<vector<double>> L(n, vector<double>(n, 0));
+    vector<vector<double>> U(n, vector<double>(n, 0));
     
-    if (!QR_Decomposition_Cholesky(A, Q, R)) {
+    if (!LU_Decomposition_Cholesky(A, L, U)) {
         cout << "Choletsky decomposition failed (the matrix was not positively definite)..." << endl;
         return vector<double>(n, 0);
     }
@@ -149,9 +149,9 @@ vector<double> solveUsingQR(vector<vector<double>> A, vector<double> b) {
     for (int i = 0; i < n; ++i) {
         double sum = 0;
         for (int j = 0; j < i; ++j) {
-            sum += Q[i][j] * y[j];
+            sum += L[i][j] * y[j];
         }
-        y[i] = (b[i] - sum) / Q[i][i];
+        y[i] = (b[i] - sum) / L[i][i];
     }
 
     // Решение системы Rx = y
@@ -159,16 +159,16 @@ vector<double> solveUsingQR(vector<vector<double>> A, vector<double> b) {
     for (int i = n - 1; i >= 0; i--) {
         double sum = 0;
         for (int j = i + 1; j < n; ++j) {
-            sum += R[i][j] * x[j];
+            sum += U[i][j] * x[j];
         }
-        x[i] = (y[i] - sum) / R[i][i];
+        x[i] = (y[i] - sum) / U[i][i];
     }
 
     return x;
 }
 
 // Функция для решения системы методом Гаусса-Зейделя
-vector<double> solveUsingGaussSeidel(const vector<vector<double>> A, const vector<double> b, double eps = 1e-8, int max_iter = 100) {
+vector<double> solveUsingGaussSeidel(const vector<vector<double>>& A, const vector<double>& b, double eps = 1e-8, int max_iter = 1000) {
     int n = A.size();
     vector<double> x(n, 0);
     vector<double> x_new(n, 0);
@@ -196,6 +196,7 @@ vector<double> solveUsingGaussSeidel(const vector<vector<double>> A, const vecto
         }
         
         if (converged) {
+            cout << "Count Iter: " << iter << endl;
             return x_new;
         }
         
@@ -206,12 +207,12 @@ vector<double> solveUsingGaussSeidel(const vector<vector<double>> A, const vecto
 }
 
 // Функция для решения системы методом Якоби
-vector<double> solveUsingJacobi(const vector<vector<double>> A, const vector<double> b, double eps = 1e-8, int max_iter = 100) {
+vector<double> solveUsingJacobi(const vector<vector<double>> A, const vector<double> b, double eps = 1e-8, int max_iter = 1000) {
     int n = A.size();
     vector<double> x(n, 0);
     vector<double> x_new(n, 0);
     
-    for (int iter = 0; iter < max_iter; iter++) {
+    for (int iter = 0; iter < max_iter; ++iter) {
         for (int i = 0; i < n; ++i) {
             double sum = 0;
             for (int j = 0; j < n; ++j) {
@@ -232,6 +233,7 @@ vector<double> solveUsingJacobi(const vector<vector<double>> A, const vector<dou
         }
         
         if (converged) {
+            cout << "Count Iter: " << iter << endl;
             return x_new;
         }
         
@@ -256,7 +258,6 @@ vector<double> solveUsingTridiagonal(vector<vector<double>> A, vector<double> b)
         }
     }
     
-    // Прямой ход
     for (int i = 1; i < n; ++i) {
         double m = A[i][i - 1] / A[i - 1][i - 1];
         A[i][i] -= m * A[i - 1][i];
@@ -270,6 +271,64 @@ vector<double> solveUsingTridiagonal(vector<vector<double>> A, vector<double> b)
         x[i] = (b[i] - A[i][i + 1] * x[i + 1]) / A[i][i];
     }
     
+    return x;
+}
+
+// Решение методом QR-разложения Грама-Шмидта
+vector<double> solveUsingQR(const vector<vector<double>>& A, const vector<double>& b) {
+    int n = A.size();
+    vector<vector<double>> Q = A; // Начальная инициализация Q как A
+    vector<vector<double>> R(n, vector<double>(n, 0));
+
+    // Процесс ортонормализации Грама-Шмидта
+    for (int i = 0; i < n; i++) {
+        // Для R
+        for (int j = 0; j <= i; j++) {
+            R[j][i] = 0;
+            for (int k = 0; k < n; k++) {
+                R[j][i] += A[k][i] * Q[k][j];
+            }
+        }
+
+        // Для Q
+        for (int j = 0; j < n; j++) {
+            Q[j][i] = A[j][i];
+            for (int k = 0; k < i; k++) {
+                Q[j][i] -= Q[j][k] * R[k][i];
+            }
+        }
+
+        // Нормализация
+        double norm = 0;
+        for (int j = 0; j < n; j++) {
+            norm += Q[j][i] * Q[j][i];
+        }
+        norm = sqrt(norm);
+        for (int j = 0; j < n; j++) {
+            Q[j][i] /= norm;
+        }
+    }
+
+    // Решение Rx = Q^Tb
+    vector<double> x(n, 0);
+    vector<double> Qtb(n, 0);
+
+    // Вычисление y = Q^Tb
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            Qtb[i] += Q[j][i] * b[j];
+        }
+    }
+
+    // Обратный ход для решения Rx = y
+    for (int i = n - 1; i >= 0; --i) {
+        x[i] = Qtb[i];
+        for (int j = i + 1; j < n; ++j) {
+            x[i] -= R[i][j] * x[j];
+        }
+        x[i] /= R[i][i];
+    }
+
     return x;
 }
 
@@ -295,16 +354,35 @@ void TestMatrix(vector<vector<double>>& A, vector<double> b) {
     vector<double> solution4 = solveUsingLU(A, b);
     PrintVector(solution4);
 
-    cout << "System solve QR method (Cholesky):" << endl;
-    vector<double> solution5 = solveUsingQR(A, b);
+    cout << "System solve LU method (Cholesky):" << endl;
+    vector<double> solution5 = solveUsingCholesky(A, b);
     PrintVector(solution5);
+
+    cout << "System solve QR method (Gram–Schmidt):" << endl;
+    vector<double> solution6 = solveUsingQR(A, b);
+    PrintVector(solution6);
 }
 
 int main(int argc, char* argv[]) {
-    vector<vector<double>> A = {{81, -45, 45},
-                                {-45, 50, -15},
-                                {45, -15, 38}};
-    vector<double> b = {531, -460, 193};
+    // vector<vector<double>> A = {{81, -45, 45},
+    //                             {-45, 50, -15},
+    //                             {45, -15, 38}};
+    // vector<double> b = {531, -460, 193};
+
+    // vector<vector<double>> A = {{4, -1, -1},
+    //                             {-1, 4, -1},
+    //                             {-1, -1, 4}};
+    // vector<double> b = {2, 2, 2};
+
+    // vector<vector<double>> A = {{1.0, 1.0/2, 1.0/3}, //Найти число обусловл A2
+    //                             {1.0/2, 1.0/3, 1.0/4},
+    //                             {1.0/3, 1.0/4, 1.0/5}};
+    // vector<double> b = {1, 1, 1};
+
+    vector<vector<double>> A = {{2, -1, 0},
+                                {-1, 2, -1},
+                                {0, -1, 2}};
+    vector<double> b = {2, 2, 2};
     TestMatrix(A, b);
     return 0;
 }
