@@ -19,8 +19,8 @@ def improved_euler_method(f, x0, y0, h, xn):
     y[0] = y0
     for i in range(1, n):
         k1 = f(x[i-1], y[i-1])
-        k2 = f(x[i-1] + h/2, y[i-1] + h/2 * k1)
-        y[i] = y[i-1] + h * k2
+        k2 = y[i-1] + h * k1
+        y[i] = y[i-1] + (h/2) * (f(x[i-1], k2) + k1)
     return x, y
 
 # Метод Рунге-Кутты(k=4)
