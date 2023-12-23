@@ -7,4 +7,4 @@
 ### -[Решение СЛАУ](SystemOfLinearEquations/)
 ### -[Решение нелинейный уравнений](NonlinearEquation/)
 ### -[Разностная апроксимация](DifferenceApproximation/)
-### -[Решение задачи Коши](CauchyProblem/)
+### -[Разностная схема](DifferenceScheme/)
