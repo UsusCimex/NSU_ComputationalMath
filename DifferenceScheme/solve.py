@@ -9,7 +9,7 @@ nx = 100  # число шагов по пространству
 nt = 100  # число шагов по времени
 dx = L / nx
 dt = T / nt
-c = 1.0   # скорость волны
+a = 1.0
 
 # Функция для начального условия
 def initial_condition(x):
@@ -21,19 +21,19 @@ x = np.linspace(-1, L, nx)
 u0 = initial_condition(x)
 
 # Явная схема "Крест"
-def cross_scheme(u, c, dx, dt, nx):
+def cross_scheme(u, a, dx, dt, nx):
     u_new = np.copy(u)
     for i in range(1, nx - 1):
-        u_new[i] = u[i] - c * dt / (2 * dx) * (u[i+1] - u[i-1])
+        u_new[i] = u[i] - a * dt / (2 * dx) * (u[i+1] - u[i-1])
     return u_new
 
 # Неявная схема с центральной разностью
-def implicit_scheme(u, dx, dt):
+def implicit_scheme(u, a, dx, dt):
     nx = len(u)
     A = np.zeros((3, nx))
-    A[0, 1:] = -dt / (2 * dx)  # верхняя диагональ
+    A[0, 1:] = -dt * a / (2 * dx)  # верхняя диагональ
     A[1, :] = 1                # главная диагональ
-    A[2, :-1] = dt / (2 * dx)  # нижняя диагональ
+    A[2, :-1] = dt * a / (2 * dx)  # нижняя диагональ
     b = np.copy(u)
     return solve_banded((1, 1), A, b)
 
@@ -44,8 +44,8 @@ u_cross[0, :] = u0
 u_implicit[0, :] = u0
 
 for n in range(1, nt):
-    u_cross[n, :] = cross_scheme(u_cross[n-1, :], c, dx, dt, nx)
-    u_implicit[n, :] = implicit_scheme(u_implicit[n-1, :], dx, dt)
+    u_cross[n, :] = cross_scheme(u_cross[n-1, :], a, dx, dt, nx)
+    u_implicit[n, :] = implicit_scheme(u_implicit[n-1, :], a, dx, dt)
 
 # Визуализация
 plt.figure(figsize=(12, 6))
