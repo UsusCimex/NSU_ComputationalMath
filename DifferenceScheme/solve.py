@@ -70,18 +70,17 @@ ax.set_xlim(x[0], x[-1])
 ax.set_ylim(-1.1, 1.1)
 ax.set_xlabel('x')
 ax.set_ylabel('u')
-ax.set_title('Решение задачи переноса в 0 время')
+ax.set_title('Решение задачи переноса')
 ax.legend()
 
 # Функция анимации
 def animate(i):
     line1.set_ydata(u_cross[i, :])
     line2.set_ydata(u_implicit[i, :])
-    ax.set_title(f'Решение задачи переноса в {i} время')
     return line1, line2
 
 # Создание анимации
-ani = FuncAnimation(fig, animate, frames=nt, interval=50, blit=True)
+ani = FuncAnimation(fig, animate, frames=nt, interval=20, blit=True)
 
 # Показать анимацию
 plt.show()
