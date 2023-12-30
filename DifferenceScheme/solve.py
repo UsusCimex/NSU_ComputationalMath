@@ -3,55 +3,124 @@ import matplotlib.pyplot as plt
 from scipy.linalg import solve_banded
 from matplotlib.animation import FuncAnimation
 
-# Параметры сетки и уравнения
-L = 5.0  # длина отрезка
-T = 1.0  # общее время
-nx = 500  # число шагов по пространству
-nt = 500  # число шагов по времени
-dx = L / nx
-dt = T / nt
-a = 1.0
-
+left = 1.5
+right = 1.0
 # Функция для начального условия
 def initial_condition(x):
-    return np.piecewise(x, [x < 1, (1 <= x) & (x < 4), x >= 4],
-                        [0, lambda x: np.sin(np.pi * (x - 1) / 3), 0])
+    # return np.piecewise(x, [x < 1,         (1 <= x) & (x < 4)           , x >= 4],
+    #                        [0    , lambda x: np.sin(np.pi * (x - 1) / 3), 0     ])
+    return np.piecewise(x, [x < 0, x >= 0],
+                           [left ,right  ])
 
 c = 1
 def f(u):
-    return c * u
-    # return u ** 2 / 2 
+    # return c * u
+    return (u ** 2) / 2 
 
 # Инициализация сетки
-x = np.linspace(-1, L, nx)
-u0 = initial_condition(x)
+# L = 5.0  # длина отрезка
+# T = 1.0  # общее время
+# nx = 500  # число шагов по пространству
+# nt = 100  # число шагов по времени
+# dx = L / nx # h
+# dt = T / nt # tau
+# x = np.linspace(0, 5, nx)
+
+L = 2.0  # длина отрезка
+T = 1.0  # общее время
+nx = 200  # число шагов по пространству
+nt = 100  # число шагов по времени
+dx = L / nx # h
+dt = T / nt # tau
+x = np.linspace(-1, 1, nx)
 
 # Явная схема "Крест"
-def cross_scheme(u, a, dx, dt, nx):
+def cross_scheme(u_old, u, dx, dt, nx):
     u_new = np.copy(u)
-    for i in range(1, nx - 1):
-        u_new[i] = u[i] - a * dt / (2 * dx) * (f(u[i+1]) - f(u[i-1]))
+    dt = dx / max(u)
+    for i in range(nx):
+        # a = c
+        a = u[i]
+        print(f"Courant number: {a * dt / dx}")
+        if (i == 0):
+            # u_new[i] = u_old[i] - a * dt / dx * (f(u[i+1]) - f(0))
+            u_new[i] = u_old[i] - a * dt / dx * (f(u[i+1]) - f(left))
+        elif (i == nx - 1):
+            # u_new[i] = u_old[i] - a * dt / dx * (f(0) - f(u[i-1]))
+            u_new[i] = u_old[i] - a * dt / dx * (f(right) - f(u[i-1]))
+        else:
+            u_new[i] = u_old[i] - a * dt / dx * (f(u[i+1]) - f(u[i-1]))
     return u_new
 
-# Неявная схема с центральной разностью
-def implicit_scheme(u, a, dx, dt):
+# Явная схема Годунова
+def godunov_scheme(u, dx, dt, nx):
+    u_new = np.copy(u)
+    dt = dx / max(u)
+    for i in range(nx):
+        # a = c
+        a = u[i]
+        print(f"Courant number: {a * dt / dx}")
+        if i == 0:
+            # u_new[i] = u[i] - a * dt / dx * f(u[i])
+            u_new[i] = u[i] + a * dt / dx * (f(left) - f(u[i]))
+        else:
+            u_new[i] = u[i] + a * dt / dx * (f(u[i-1]) - f(u[i]))
+    return u_new
+
+def persecution(A, b):
+    n = len(b)
+    c = np.zeros(n-1)
+    d = np.zeros(n)
+    
+    # Прямая прогонка
+    c[0] = A[0, 1] / A[1, 0]
+    d[0] = b[0] / A[1, 0]
+    for i in range(1, n-1):
+        temp = A[1, i] - A[2, i-1] * c[i-1]
+        c[i] = A[0, i+1] / temp
+        d[i] = (b[i] - A[2, i-1] * d[i-1]) / temp
+
+    d[n-1] = (b[n-1] - A[2, n-2] * d[n-2]) / (A[1, n-1] - A[2, n-2] * c[n-2])
+
+    # Обратная прогонка
+    x = np.zeros(n)
+    x[-1] = d[-1]
+    for i in range(n-2, -1, -1):
+        x[i] = d[i] - c[i] * x[i+1]
+    return x
+
+def implicit_scheme(u, dx, dt):
     nx = len(u)
     A = np.zeros((3, nx))
-    A[0, 1:] = -dt * a / (2 * dx)  # верхняя диагональ
-    A[1, :] = 1                # главная диагональ
-    A[2, :-1] = dt * a / (2 * dx)  # нижняя диагональ
-    b = np.copy(f(u))
-    return solve_banded((1, 1), A, b)
+    dt = dx / max(u)
+    for i in range(nx):
+        # a = c
+        a = u[i]
+        print(f"Courant number: {a * dt / dx}")
+        A[2, i] = -dt * a / (2 * dx)  # Нижняя диагональ
+        A[1, i] = 1                   # Главная диагональ
+        A[0, i] = dt * a / (2 * dx)   # Верхняя диагональ
+    nb = np.copy(u)
+    nb[0] = left
+    nb[-1] = right
+    return persecution(A, nb)
 
 # Расчеты
 u_cross = np.zeros((nt, nx))
 u_implicit = np.zeros((nt, nx))
+u0 = initial_condition(x)
 u_cross[0, :] = u0
 u_implicit[0, :] = u0
 
 for n in range(1, nt):
-    u_cross[n, :] = cross_scheme(u_cross[n-1, :], a, dx, dt, nx)
-    u_implicit[n, :] = implicit_scheme(u_implicit[n-1, :], a, dx, dt)
+    print(f"timeline: {n}")
+    print("Cross scheme")
+    if (n == 1):
+        u_cross[n, :] = godunov_scheme(u_cross[n-1, :], dx, dt, nx)
+    else:
+        u_cross[n, :] = cross_scheme(u_cross[n-2, :], u_cross[n-1, :], dx, dt, nx)
+    print("Implicit scheme")
+    u_implicit[n, :] = implicit_scheme(u_implicit[n-1, :], dx, dt)
 
 # Визуализация на последнем временном слое
 # plt.figure(figsize=(12, 6))
@@ -67,20 +136,16 @@ fig, ax = plt.subplots()
 line1, = ax.plot(x, u_cross[0, :], 'o-', label='Явная схема "Крест"')
 line2, = ax.plot(x, u_implicit[0, :], 'x-', label='Неявная схема с центральной разностью')
 ax.set_xlim(x[0], x[-1])
-ax.set_ylim(-1.1, 1.1)
+ax.set_ylim(-1, 2)
 ax.set_xlabel('x')
 ax.set_ylabel('u')
 ax.set_title('Решение задачи переноса')
 ax.legend()
 
-# Функция анимации
 def animate(i):
     line1.set_ydata(u_cross[i, :])
     line2.set_ydata(u_implicit[i, :])
     return line1, line2
+ani = FuncAnimation(fig, animate, frames=nt, interval=50, blit=True)
 
-# Создание анимации
-ani = FuncAnimation(fig, animate, frames=nt, interval=20, blit=True)
-
-# Показать анимацию
 plt.show()
