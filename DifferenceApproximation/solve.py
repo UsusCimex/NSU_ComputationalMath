@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 
 def y_first_order_approximation(x0, y0, h, xn):
     n = int((xn - x0) / h) + 1
@@ -7,7 +8,7 @@ def y_first_order_approximation(x0, y0, h, xn):
     y = np.zeros(n)
     y[0] = y0
     for i in range(n - 1):
-        y[i+1] = y[i]*(1-h)
+        y[i+1] = y[i]*(1 - h)
     return x,y
 
 def y_second_order_approximation(x0, y0, h, xn):
@@ -16,7 +17,7 @@ def y_second_order_approximation(x0, y0, h, xn):
     y = np.zeros(n)
     y[0] = y0
     for i in range(1, n):
-        y[i] = (y[i-1] + (-1)*(h/2)*y[i-1])/(1 + h/2)
+        y[i] = y[i-1] * (1 - h/2) / (1 + h/2)
     return x, y
 
 def y_fourth_order_approximation(x0, y0, h, xn):
@@ -24,9 +25,9 @@ def y_fourth_order_approximation(x0, y0, h, xn):
     x = np.linspace(x0, xn, n)
     y = np.zeros(n)
     y[0] = y0
-    y[1] = y[0]*(1-h)
+    y[1] = y[0] * (2 - h) / (2 + h)
     for i in range(1, n - 1):
-        y[i+1] = (y[i-1] + (-1)*h/3*(y[i-1] + 4*(y[i])))/(1 + h/3)
+        y[i+1] = (y[i-1] - h/3*(y[i-1] + 4*y[i])) / (1 + h/3)
     return x, y
 
 def first_order_approximation(f, x0, y0, h, xn):
@@ -47,12 +48,12 @@ def second_order_approximation(f, x0, y0, h, xn):
         y[i] = y[i-1] + (h/2) * (f(x[i-1]) + f(x[i]))
     return x, y
 
-def fourth_order_approximation(f, x0, y0, h, xn):
+def fourth_order_approximation(f, x0, y0, h, xn): 
     n = int((xn - x0) / h) + 1
     x = np.linspace(x0, xn, n)
     y = np.zeros(n)
     y[0] = y0
-    y[1] = y[0] + h * f(x[0])
+    y[1] = y[0] + h * (f(x[0]) + f(x[1])) / 2
     for i in range(1, n - 1):
         y[i+1] = y[i-1] + h/3 * (f(x[i-1]) + 4*f(x[i]) + f(x[i+1]))
     return x, y
@@ -64,7 +65,7 @@ def fourth_order_approximation(f, x0, y0, h, xn):
 y0 = 1
 x0 = 0
 xn = 5 # Предел интегрирования
-h = 0.01 # Шаг интегрирования
+h = 0.1 # Шаг интегрирования
 
 x_1, y_1 = y_first_order_approximation(x0, y0, h, xn)
 x_2, y_2 = y_second_order_approximation(x0, y0, h, xn)
@@ -105,9 +106,22 @@ def g(x):
 
 # Зададим начальные условия для g(x)
 x0 = 0
-xn = 3
-h = 0.01
+xn = 5
+h = 0.1
 y0_g = 1  # g(0) = 1
+
+# Правило Рунге
+# p = log_2{(I2h - I) / (Ih - I)}
+
+x4h, y4h = fourth_order_approximation(g, x0, y0_g, (xn - x0) / 100, xn)
+x2h, y2h = fourth_order_approximation(g, x0, y0_g, (xn - x0) / 40, xn)
+xh, yh =   fourth_order_approximation(g, x0, y0_g, (xn - x0) / 20, xn)
+p = np.zeros(len(xh))
+
+for i in range(len(xh)):
+    p[i] = np.log2(abs( (yh[i] - y4h[5*i]) / (y2h[2*i] - y4h[5*i]) ))
+
+print(p)
 
 # Применим методы к функции g(x)
 x_1, y_1 = first_order_approximation(g, x0, y0_g, h, xn)
